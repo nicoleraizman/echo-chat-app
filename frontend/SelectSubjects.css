@@ -1,0 +1,94 @@
+/* הגדרות בסיסיות עבור דף */
+body {
+    font-family: Arial, sans-serif;
+    direction: rtl; /* סידור טקסט מימין לשמאל */
+    background-color: #f0f8ff; /* רקע בהיר */
+    margin: 0;
+    padding: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* מיכל הכפתורים */
+.button-container {
+    display: flex;
+    flex-direction: column; /* הכפתורים יהיו בעמודה */
+    align-items: center; /* ממורכז */
+    width: 300px; /* רוחב קבוע לכפתורים */
+    padding: 20px;
+    background-color: #ffffff; /* רקע לבן */
+    border-radius: 8px; /* פינות מעוגלות */
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* הצללה עדינה */
+}
+
+/* כותרת */
+.subject-headline {
+    margin-top: 0;
+    font-size: 20px;
+    color: #333; /* צבע כהה */
+    margin-bottom: 20px;
+}
+
+/* הגדרות עבור כפתורים */
+button {
+    width: 100%; /* הכפתור יימתח על כל רוחב המיכל */
+    padding: 12px;
+    margin: 10px 0; /* רווח בין הכפתורים */
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* כפתור 1 - כחול כהה */
+.topic-button1 {
+    background-color: #003366; 
+    color: white;
+}
+
+.topic-button1:hover {
+    background-color: #002244; 
+}
+
+/* כפתור 2 - כחול בינוני */
+.topic-button2 {
+    background-color: #007BFF;
+    color: white;
+}
+
+.topic-button2:hover {
+    background-color: #0056b3; 
+}
+
+/* כפתור 3 - טורקיז */
+.topic-button3 {
+    background-color: #1E90FF; 
+    color: white;
+}
+
+.topic-button3:hover {
+    background-color: #1c7ed6; 
+}
+
+/* כפתור 4 - כחול שמיים */
+.topic-button4 {
+    background-color: #87CEEB; 
+    color: white;
+}
+
+.topic-button4:hover {
+    background-color: #69b3e7;
+}
+
+/* כפתור 5 - כחול פסטל */
+.topic-button5 {
+    background-color: #ADD8E6; 
+    color: white;
+}
+
+.topic-button5:hover {
+    background-color: #9ec8f3; 
+}

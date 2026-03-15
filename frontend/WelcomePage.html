@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ECHO Login</title>
+
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Heebo', 'sans-serif'],
+          },
+          colors: {
+            primary: '#315769',
+            primaryHover: '#274a59',
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+</head>
+
+<body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
+  <div class="container mx-auto max-w-md bg-white p-8 rounded-2xl shadow-lg text-center">
+    <img src="icon2.png" alt="ECHO Logo" class="mx-auto mb-8 w-36 h-auto" />
+    <h1 class="text-3xl font-bold mb-4 text-gray-900">ברוכים הבאים!</h1>
+    <h2 class="text-xl font-semibold mb-6 text-gray-700">
+      הצטרפו אלינו ודברו עם אנשים אחרים על מה שבוער עכשיו.
+    </h2>
+    <p class="text-gray-600 mb-8 text-base">
+      שימו לב - אנחנו מאמינים בשיח חופשי ומכבד, ועל כן הודעות פוגעניות ינוסחו מחדש ע"י מודל חכם ויפורסמו לאחר אישור מחדש.
+    </p>
+
+    <input
+      type="text"
+      id="nickname"
+      placeholder="נא לבחור כינוי"
+      class="w-full p-3 rounded-lg border border-gray-300 mb-6 text-lg"
+    />
+
+    <p class="text-gray-700 text-lg font-semibold mb-3">
+      התחבר עם חשבון גוגל של האוניברסיטה (mail.huji.ac.il)
+    </p>
+
+    <div id="googleSignInDiv" class="flex justify-center"></div>
+  </div>
+
+  <script src="WelcomePage.js"></script>
+</body>
+</html>

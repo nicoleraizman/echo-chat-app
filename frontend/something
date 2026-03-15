@@ -1,0 +1,137 @@
+import cron from 'node-cron';
+import axios from 'axios';
+import fs from 'fs';
+import 'dotenv/config';
+
+console.log('🚀 newsUpdater started');
+
+const GROQ_ENDPOINT = 'https://api.groq.com/openai/v1/chat/completions';
+const GROQ_API_KEY  = process.env.GROQ_API_KEY;
+const NEWS_API_KEY  = process.env.NEWS_API_KEY;
+
+const topics = {
+  bibi_trial:      'Benjamin Netanyahu trial',
+  gaza_war:        'Gaza war Israel Hamas',
+  legal_reform:    'Israel judicial overhaul',
+  recruitment_law: 'IDF conscription law haredi'
+};
+
+const lastTimestamp = {};
+
+// ---------------------------------------------------------------------------
+// 1. Fetch latest 5 articles from NewsAPI /everything (free tier works)
+// ---------------------------------------------------------------------------
+async function fetchNews(query) {
+  const url = `https://newsapi.org/v2/everything?q=${encodeURIComponent(query)}&sortBy=publishedAt&pageSize=5&apiKey=${NEWS_API_KEY}`;
+  const { data } = await axios.get(url);
+  return data.articles ?? [];
+}
+
+// ---------------------------------------------------------------------------
+// 2. Summarise with Groq – robust JSON extraction + URL fix
+// ---------------------------------------------------------------------------
+async function summarizeArticles(articles) {
+  if (!articles.length) return [];
+
+  // 2.1 בונים את ה-prompt כרגיל
+  const prompt =
+    'סכם כל כתבה בפסקה קצרה (עד 80 מילים) בעברית. החזר *רק* JSON array במבנה:\n' +
+    '[\n  { "headline": "...", "body": "...", "url": "..." },\n  ...\n]\n\n' +
+    'כתבות:\n' +
+    articles
+      .map(
+        (a, i) =>
+          `[${i + 1}] כותרת: ${a.title}\nתקציר: ${a.description || ''}\nקישור: ${a.url}`
+      )
+      .join('\n');
+
+  // 2.2 שולחים ל-Groq
+  const { data } = await axios.post(
+    GROQ_ENDPOINT,
+    {
+      model: 'llama3-70b-8192',
+      messages: [{ role: 'user', content: prompt }],
+      temperature: 0.3
+    },
+    {
+      headers: {
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+        'Content-Type': 'application/json'
+      }
+    }
+  );
+
+  // 2.3 מוצאים את ה-JSON array הגולמי
+  const raw = (data.choices?.[0]?.message?.content || '').trim();
+  const m = raw.match(/\[\s*\{[\s\S]*\}\s*\]/);
+  if (!m) {
+    console.error('❌ Unable to extract JSON array from LLM response:', raw);
+    return [];
+  }
+  let jsonText = m[0];
+
+  // 2.4 תיקון פסיקים בין אובייקטים (אם חסר)
+  jsonText = jsonText.replace(/}\s*{\s*/g, '},{');
+
+  // 2.5 הוספת שדה "url" לאובייקטים שבהם הקישור הוחזר בלי שם שדה
+  //    מחפש מחרוזת שמתחילה ב־http… ללא "url": ומעביר אותה ל-"url":"…"
+  jsonText = jsonText.replace(
+    /,\s*"((?:https?:\/\/)[^"]+)"(?=\s*[,}])/g,
+    ',"url":"$1"'
+  );
+
+  // 2.6 ניסיון לפרס את ה-JSON המתוקן
+  try {
+    return JSON.parse(jsonText);
+  } catch (e) {
+    console.error('❌ JSON.parse error:', e.message);
+    console.error('❌ Raw JSON text:', jsonText);
+    return [];
+  }
+}
+
+
+// ---------------------------------------------------------------------------
+function savePosts(topicId, posts) {
+  const dir = './data';
+  if (!fs.existsSync(dir)) fs.mkdirSync(dir);
+  const path = `${dir}/${topicId}.json`;
+  const existing = fs.existsSync(path) ? JSON.parse(fs.readFileSync(path, 'utf-8')) : [];
+  fs.writeFileSync(path, JSON.stringify([...posts, ...existing], null, 2));
+}
+
+async function handleTopic(topicId, query) {
+  try {
+    const articles = await fetchNews(query);
+    console.log(`↪︎ ${topicId}: קיבלנו ${articles.length} כתבות`);
+
+    const fresh = articles.filter(a => {
+      const ts = new Date(a.publishedAt || Date.now()).getTime();
+      return !lastTimestamp[topicId] || ts > lastTimestamp[topicId];
+    });
+    if (!fresh.length) return;
+    lastTimestamp[topicId] = new Date(fresh[0].publishedAt || Date.now()).getTime();
+
+    const summaries = await summarizeArticles(fresh);
+    if (!summaries.length) return;
+
+    savePosts(
+      topicId,
+      summaries.map(s => ({ ...s, topicId, createdAt: new Date().toISOString(), isAuto: true }))
+    );
+    console.log(`✅  Added ${summaries.length} autoposts to ${topicId}`);
+  } catch (err) {
+    if (err.response?.status === 401) {
+      console.error('🚨 401 – בדוק את GROQ_API_KEY או NEWS_API_KEY');
+    } else {
+      console.error('❌', topicId, err.message);
+    }
+  }
+}
+
+(async () => {
+  for (const [id, q] of Object.entries(topics)) await handleTopic(id, q);
+  cron.schedule('0 * * * *', async () => {
+    for (const [id, q] of Object.entries(topics)) await handleTopic(id, q);
+  });
+})();

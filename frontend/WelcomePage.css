@@ -1,0 +1,75 @@
+/* בסיסי */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f4f4f4; /* רקע אפור בהיר */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; /* גובה המסך */
+    margin: 0;
+}
+
+.container {
+    background-color: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* צללית עדינה */
+    text-align: center;
+    width: 80%; /* גודל גמיש */
+    max-width: 500px; /* גודל מקסימלי */
+}
+
+h1 {
+    color: #333; /* כותרת כהה */
+    margin-bottom: 20px;
+}
+
+h2 {
+  color: #555;
+  margin-bottom: 20px ;
+}
+
+p {
+    color: #666; /* טקסט בהיר */
+    margin-bottom: 30px;
+    font-size: 16px;
+}
+
+/* תיבת הקלט */
+input[type="text"] {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 20px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 16px;
+}
+
+/* כפתור */
+button {
+    background-color: #007bff; /* כחול */
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3; /* כחול כהה יותר בעת ריחוף */
+}
+
+.logo {
+    width: 150px; /* or any value like 150px, 50% etc. */
+    height: auto; /* maintain aspect ratio */
+}
+
+

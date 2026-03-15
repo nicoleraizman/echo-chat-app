@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Echo Chat</title>
+  <link href="https://fonts.googleapis.com/css2?family=Heebo&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="chat.css">
+  <script src="chat.js" defer></script>
+</head>
+<body>
+
+<div class="main-container">
+  <div class="topic-sidebar" id="topicDescription">
+    <h2 class="topic-title" id="sidebarTitle">טוען...</h2>
+    <div id="sidebarText"></div>
+  </div>
+
+  <div class="chat-container">
+    <div class="chat-header">
+      <button class="hamburger" id="menuButton">☰</button>
+      
+      <button class="back-button" onclick="window.location.href='SelectSubjects.html'">
+      <svg xmlns="http://www.w3.org/2000/svg" class="lucide lucide-arrow-left" width="20" height="20" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        style="transform: scaleX(-1);">
+        <path d="M19 12H5" />
+        <path d="M12 19l-7-7 7-7" />
+      </svg>
+      </button>
+      
+      <h2 class="chat-topic-title" id="headerTitle">טוען...</h2>
+
+      <div class="menu" id="menu">
+        <button onclick="window.location.href='chat.html?topic=Legal_reform'">הרפורמה המשפטית</button>
+        <button onclick="window.location.href='chat.html?topic=Bibi_trial'">תיקי נתניהו</button>
+        <button onclick="window.location.href='chat.html?topic=Gaza_war'">המלחמה בעזה</button>
+        <button onclick="window.location.href='chat.html?topic=Recruitment_law'">חוק הגיוס</button>
+      </div>
+    </div>
+
+    <div class="chat-messages" id="chatMessages"></div>
+
+    <div id="messageOptions" style="display:none"></div>
+
+    <div class="chat-input-area">
+      <input type="text" dir="rtl" id="chatInput" placeholder="הוסף תגובה...">
+      <button id="sendButton">שלח</button>
+    </div>
+  </div>
+</div>
+</body>
+</html>
