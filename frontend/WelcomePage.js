@@ -10,12 +10,9 @@ function handleCredentialResponse(response) {
   const payload = JSON.parse(atob(token.split('.')[1]));
   const email = payload.email;
 
-  if (!email.endsWith('@mail.huji.ac.il')) {
-    alert("המערכת פתוחה רק למשתמשי mail.huji.ac.il");
-    return;
-  }
+  
 
-  // שמירה
+  
   localStorage.setItem("nickname", nickname);
   localStorage.setItem("email", email);
 
@@ -24,7 +21,7 @@ function handleCredentialResponse(response) {
 
 window.onload = function () {
   google.accounts.id.initialize({
-    client_id: "47791734926-irigvga2ettupaapukbsmkoaovgkuf83.apps.googleusercontent.com",
+    client_id: "685319884554-s4u1h9113dkarueaqfja9q7nseq2bs1a.apps.googleusercontent.com", 
     callback: handleCredentialResponse
   });
 

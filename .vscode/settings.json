@@ -1,0 +1,17 @@
+{
+    "sqltools.connections": [
+        {
+            "pgOptions": {
+                "ssl": {
+                    "rejectUnauthorized": true
+                }
+            },
+            "ssh": "Disabled",
+            "previewLimit": 50,
+            "server": "localhost",
+            "driver": "PostgreSQL",
+            "name": "Echo DB",
+            "connectString": "postgresql://echo_solo_db_user:RMCU710ppCefKJhHw0aivvXJKlouN7X0@dpg-d6rudihj16oc73eeal6g-a.oregon-postgres.render.com/echo_solo_db"
+        }
+    ]
+}
