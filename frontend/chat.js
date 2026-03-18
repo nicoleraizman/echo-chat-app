@@ -9,6 +9,10 @@ class ChatRoom {
         this.isSending = false;
         this.userScrolledUp = false;
         this.displayedMessageIds = new Set();
+        this.viewMode = 'all';
+        
+        // Use a Set to remember all dates we have drawn
+        this.displayedDates = new Set(); 
 
         // Dictionary holding specific data for each topic
         this.topicData = {
@@ -18,21 +22,28 @@ class ChatRoom {
             },
             'Legal_reform': {
                 title: 'הרפורמה המשפטית',
-                desc: 'הכנס כאן את טקסט ההסבר על הרפורמה המשפטית...' // Add your actual text here
+                desc: 'הכנס כאן את טקסט ההסבר על הרפורמה המשפטית...' 
             },
             'Gaza_war': {
                 title: 'המלחמה בעזה',
-                desc: 'הכנס כאן את טקסט ההסבר על המלחמה בעזה...' // Add your actual text here
+                desc: 'הכנס כאן את טקסט ההסבר על המלחמה בעזה...' 
             },
             'Bibi_trial': {
                 title: 'תיקי נתניהו',
-                desc: 'הכנס כאן את טקסט ההסבר על תיקי נתניהו...' // Add your actual text here
+                desc: 'הכנס כאן את טקסט ההסבר על תיקי נתניהו...' 
             }
         };
 
         this.initUI();
         this.setupEventListeners();
         this.startPolling();
+    }
+
+    clearChatBox() {
+        const chatBox = document.getElementById("chatMessages");
+        if (chatBox) chatBox.innerHTML = "";
+        this.displayedMessageIds.clear();
+        this.displayedDates.clear(); // Clear dates memory when switching filters
     }
 
     initUI() {
@@ -58,6 +69,23 @@ class ChatRoom {
             const menu = document.getElementById('menu');
             menu.style.display = (menu.style.display === 'flex') ? 'none' : 'flex';
         });
+        
+        const showMineBtn = document.getElementById("showMineBtn");
+        const showAllBtn = document.getElementById("showAllBtn");
+
+        if (showMineBtn && showAllBtn) {
+            showMineBtn.addEventListener("click", () => {
+                this.viewMode = 'mine';
+                this.clearChatBox();
+                this.fetchAndDisplayMessages(); // Instantly refresh
+            });
+
+            showAllBtn.addEventListener("click", () => {
+                this.viewMode = 'all';
+                this.clearChatBox();
+                this.fetchAndDisplayMessages(); // Instantly refresh
+            });
+        }
 
         const chatBox = document.getElementById("chatMessages");
         if (chatBox) {
@@ -96,9 +124,9 @@ class ChatRoom {
             } else if (result.rewrittenMessages && result.rewrittenMessages.length > 0) {
                 this.displayMessageOptions(result.rewrittenMessages, inputMessage);
             } else {
-                // Fallback if moderation fails
-                await this.sendToBackend(inputMessage);
-                chatInput.value = "";
+                // FALLBACK: Block the message if the AI gets confused!
+                alert("מערכת הסינון נתקלה בשגיאה (או שההודעה אינה הולמת ולא נמצאו חלופות). אנא נסח מחדש ונסה שוב.");
+                this.isSending = false;
             }
         } catch (error) {
             console.error("Error during message processing:", error);
@@ -149,8 +177,15 @@ class ChatRoom {
 
     async fetchAndDisplayMessages() {
         try {
+            // Decide which URL to use based on the current mode
+            let messagesUrl = `http://localhost:3000/messages?topic=${encodeURIComponent(this.topic)}`;
+            
+            if (this.viewMode === 'mine') {
+                messagesUrl = `http://localhost:3000/api/messages/user/${encodeURIComponent(this.username)}`;
+            }
+
             const [messagesRes, reactionsRes] = await Promise.all([
-                fetch(`http://localhost:3000/messages?topic=${encodeURIComponent(this.topic)}`),
+                fetch(messagesUrl), 
                 fetch(`http://localhost:3000/reactions?topic=${encodeURIComponent(this.topic)}`)
             ]);
 
@@ -167,21 +202,19 @@ class ChatRoom {
             });
 
             const chatBox = document.getElementById("chatMessages");
-            this.displayedMessageIds.clear();
-            chatBox.innerHTML = "";
-
-            let lastMessageDate = null;
 
             messages.forEach(msg => {
                 const msgDate = new Date(msg.created_at);
                 const dateOnly = msgDate.toLocaleDateString('he-IL');
 
-                if (dateOnly !== lastMessageDate) {
+                // 🚀 THE FIX: Only draw the date if we haven't seen it yet!
+                if (!this.displayedDates.has(dateOnly)) {
                     const wrapper = document.createElement("div");
                     wrapper.style.textAlign = "center";
                     wrapper.innerHTML = `<div class="date-divider">${dateOnly}</div>`;
                     chatBox.appendChild(wrapper);
-                    lastMessageDate = dateOnly;
+                    
+                    this.displayedDates.add(dateOnly); // Add to memory
                 }
 
                 const fullMessage = `${msg.username}: ${msg.content}`;
@@ -196,7 +229,24 @@ class ChatRoom {
     }
 
     displaySingleMessage(message, type, timestamp, messageId, reactions, chatBox) {
-        if (this.displayedMessageIds.has(messageId)) return;
+        // SMART UPDATE: If message is already on screen, just update the likes/dislikes!
+        if (this.displayedMessageIds.has(messageId)) {
+            const likeSpan = document.getElementById(`like-count-${messageId}`);
+            const dislikeSpan = document.getElementById(`dislike-count-${messageId}`);
+            
+            if (likeSpan) {
+                likeSpan.textContent = reactions.like || 0;
+                if (reactions.user_reaction === 'like') likeSpan.parentElement.classList.add('active');
+                else likeSpan.parentElement.classList.remove('active');
+            }
+            if (dislikeSpan) {
+                dislikeSpan.textContent = reactions.dislike || 0;
+                if (reactions.user_reaction === 'dislike') dislikeSpan.parentElement.classList.add('active');
+                else dislikeSpan.parentElement.classList.remove('active');
+            }
+            return; 
+        }
+
         this.displayedMessageIds.add(messageId);
 
         const wrapper = document.createElement("div");
@@ -237,7 +287,7 @@ class ChatRoom {
         bubble.className = "reaction-bubble";
         if (userReaction === type) bubble.classList.add("active");
         
-        bubble.innerHTML = `<span class="emoji">${emoji}</span><span class="count">${count || 0}</span>`;
+        bubble.innerHTML = `<span class="emoji">${emoji}</span><span class="count" id="${type}-count-${messageId}">${count || 0}</span>`;
         
         if (!disabled) {
             bubble.style.cursor = "pointer";

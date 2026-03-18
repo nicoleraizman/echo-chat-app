@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Echo Chat</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  
   <link href="https://fonts.googleapis.com/css2?family=Heebo&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="chat.css">
   <script src="chat.js" defer></script>
@@ -37,6 +40,15 @@
         <button onclick="window.location.href='chat.html?topic=Gaza_war'">המלחמה בעזה</button>
         <button onclick="window.location.href='chat.html?topic=Recruitment_law'">חוק הגיוס</button>
       </div>
+    </div>
+
+    <div class="flex justify-center gap-4 py-3 bg-[#f0eedf] border-b border-gray-300 shadow-sm relative z-10">
+      <button id="showAllBtn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-lg font-semibold hover:bg-gray-300 transition">
+        כל ההודעות
+      </button>
+      <button id="showMineBtn" class="bg-[#315769] text-white px-4 py-2 rounded-lg font-semibold hover:bg-[#274a59] transition">
+        ההודעות שלי
+      </button>
     </div>
 
     <div class="chat-messages" id="chatMessages"></div>

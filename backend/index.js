@@ -42,6 +42,26 @@ app.get('/messages', async (req, res) => {
         res.sendStatus(500);
     }
 });
+// GET all messages from a specific user
+app.get('/api/messages/user/:username', async (req, res) => {
+  try {
+    // 1. Grab the username directly from the URL
+    const requestedUser = req.params.username;
+    
+    // 2. Ask PostgreSQL to find only messages matching that username
+    // The $1 is a security feature to prevent SQL Injection!
+    const result = await db.query(
+      'SELECT * FROM messages WHERE username = $1 ORDER BY created_at ASC',
+      [requestedUser]
+    );
+    
+    // 3. Send that specific list of messages back to the frontend
+    res.json(result.rows);
+  } catch (err) {
+    console.error("❌ Error fetching user messages:", err.message);
+    res.status(500).send("Server Error");
+  }
+});
 
 app.post('/react', async (req, res) => {
     const { message_id, username, reaction } = req.body;
@@ -83,7 +103,7 @@ app.get('/reactions', async (req, res) => {
 });
 
 // ====================================================================
-// SECTION 2: AI Content Moderation Route
+// SECTION 2: AI Content Moderation Route (JSON Mode)
 // ====================================================================
 
 app.post('/moderate-message', async (req, res) => {
@@ -94,12 +114,25 @@ app.post('/moderate-message', async (req, res) => {
     }
 
     try {
-        const respectResponse = await axios.post(
+        const response = await axios.post(
             'https://api.groq.com/openai/v1/chat/completions',
             {
                 model: 'llama-3.3-70b-versatile',
-                messages: [{ role: 'user', content: `האם המסר הבא ראוי לכך שבן 5 ישמע אותו? הוא לא רגיש מדי. תגיד רק כן או לא: '${message}'` }],
-                temperature: 0.1
+                messages: [
+                    { 
+                        role: 'system', 
+                        content: `You are a strict Hebrew content moderator. Evaluate if the following message is respectful and appropriate for a 5-year-old child.
+                        You MUST respond in strict JSON format. 
+                        If it is respectful, return: {"isRespectful": true, "rewrittenMessages": []}
+                        If it is disrespectful, return: {"isRespectful": false, "rewrittenMessages": ["polite option 1", "polite option 2", "polite option 3"]}`
+                    },
+                    { 
+                        role: 'user', 
+                        content: message 
+                    }
+                ],
+                temperature: 0.2,
+                response_format: { type: "json_object" } // 🚀 This forces the AI to output pure JSON!
             },
             {
                 headers: {
@@ -109,45 +142,12 @@ app.post('/moderate-message', async (req, res) => {
             }
         );
 
-        const respectText = respectResponse.data.choices[0].message.content.trim();
-        const isRespectful = respectText.includes("כן");
-
-        if (isRespectful) {
-            return res.json({ isRespectful: true });
-        }
-
-        const rewriteResponse = await axios.post(
-            'https://api.groq.com/openai/v1/chat/completions',
-            {
-                model: 'llama-3.3-70b-versatile',
-                messages: [{ role: 'user', content: `כתוב לי *רק* שלושה ניסוחים חלופיים להודעה הלא מכבדת הזו בצורה הולמת גם לילד בן 5. אל תסביר את ההחלטה. הנה ההודעה: ${message}` }],
-                temperature: 0.5
-            },
-            {
-                headers: {
-                    'Authorization': `Bearer ${process.env.GROQ_API_KEY}`,
-                    'Content-Type': 'application/json'
-                }
-            }
-        );
-
-        const rawText = rewriteResponse.data.choices[0].message.content;
+        // Instantly parse the perfect JSON object from the AI
+        const aiResponse = JSON.parse(response.data.choices[0].message.content);
         
-        const rewrittenMessages = rawText
-            .split('\n')
-            .map(line => line.trim())
-            .filter(line => line && (/^\d+\.\s/.test(line) || /^[-*]\s/.test(line)))
-            .map(l => l
-                .replace(/^\d+\.\s*/, '')                                
-                .replace(/^[-*]\s*/, '')                                 
-                .replace(/^["“”״׳'`]+|["“”״׳'`]+$/g, '')                 
-                .trim()                                                  
-            )
-            .slice(0, 3);
-
         return res.json({ 
-            isRespectful: false, 
-            rewrittenMessages: rewrittenMessages 
+            isRespectful: aiResponse.isRespectful, 
+            rewrittenMessages: aiResponse.rewrittenMessages || [] 
         });
 
     } catch (error) {
