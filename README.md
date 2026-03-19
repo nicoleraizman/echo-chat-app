@@ -1,4 +1,4 @@
-# Echo Chat - AI-Moderated Political Forum 💬
+# Echo Chat - AI-Moderated Political Forum 
 
 **Live Demo:** https://echochat-f120.onrender.com
 
