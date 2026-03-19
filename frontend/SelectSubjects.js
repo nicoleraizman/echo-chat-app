@@ -12,7 +12,7 @@ const topics = [
     description: "מה הדרך הנכונה להתמודד עם המצב?",
     icon: "target",
     color: '#4A90E2' ,
-    id: "Gaza_war"
+    id: "Elections_2026"
   },
   {
     title: "חוק הגיוס",

@@ -160,7 +160,7 @@ class ChatRoom {
 
         try {
             // SECURE CALL: Asking our own backend to evaluate the message via Groq
-            const response = await fetch("hhttps://echo-solo-backend.onrender.com/moderate-message", {
+            const response = await fetch("https://echo-solo-backend.onrender.com/moderate-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: inputMessage })
