@@ -121,10 +121,22 @@ app.post('/moderate-message', async (req, res) => {
                 messages: [
                     { 
                         role: 'system', 
-                        content: `You are a strict Hebrew content moderator. Evaluate if the following message is respectful and appropriate for a 5-year-old child.
+                        content: `You are an expert content moderator for an Israeli political debate platform. 
+                        Your goal is to allow passionate, mature political discourse while strictly blocking toxicity.
+                        
+                        RULES FOR PASSING (isRespectful: true):
+                        - Strongly disagreeing with another user's opinion.
+                        - Criticizing politicians, laws, policies, or ideas.
+                        - Using passionate, assertive, or argumentative language about civic duties.
+                        
+                        RULES FOR FAILING (isRespectful: false):
+                        - Personal insults directed at the other user (e.g., "you are stupid", "shut up").
+                        - Profanity, curse words, or derogatory slurs.
+                        - Hate speech, violence, or threats.
+                        
                         You MUST respond in strict JSON format. 
-                        If it is respectful, return: {"isRespectful": true, "rewrittenMessages": []}
-                        If it is disrespectful, return: {"isRespectful": false, "rewrittenMessages": ["polite option 1", "polite option 2", "polite option 3"]}`
+                        If the message passes the rules, return: {"isRespectful": true, "rewrittenMessages": []}
+                        If the message fails the rules, return: {"isRespectful": false, "rewrittenMessages": ["polite Hebrew option 1", "polite Hebrew option 2", "polite Hebrew option 3"]}`
                     },
                     { 
                         role: 'user', 

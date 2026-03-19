@@ -18,19 +18,23 @@ class ChatRoom {
         this.topicData = {
             'Recruitment_law': {
                 title: 'חוק הגיוס',
-                desc: 'חוק הגיוס עוסק בהסדרת חובת הגיוס לצה"ל של אזרחי ישראל, ובמיוחד של בני המגזר החרדי...'
+                desc: 'חוק הגיוס עוסק בהסדרת חובת הגיוס לצה"ל, ובפרט בסוגיית הפטור לתלמידי ישיבות. הנושא מעורר מחלוקת עמוקה בחברה הישראלית סביב שאלות של שוויון בנטל, צורכי הביטחון ושמירת אורח החיים החרדי.',
+                color: '#5b8a72' 
             },
             'Legal_reform': {
                 title: 'הרפורמה המשפטית',
-                desc: 'הכנס כאן את טקסט ההסבר על הרפורמה המשפטית...' 
+                desc: 'הרפורמה המשפטית כוללת סדרת שינויים מוצעים במערכת המשפט, שמטרתם לשנות את מאזן הכוחות בין הרשויות. הדיון נסוב סביב מהות הדמוקרטיה, שלטון החוק, זכויות מיעוטים ועצמאות בית המשפט העליון.',
+                color: '#b13342' 
             },
-            'Gaza_war': {
-                title: 'המלחמה בעזה',
-                desc: 'הכנס כאן את טקסט ההסבר על המלחמה בעזה...' 
+            'Elections_2026': {
+                title: 'בחירות לכנסת 2026',
+                desc: 'מערכת הבחירות מציפה את שאלות היסוד של החברה הישראלית. הדיון בחדר זה מתמקד בנושאי ביטחון, כלכלה, דת ומדינה, וכן בחזון לגבי כיוונה העתידי של ישראל בשנים הקרובות.',
+                color: '#4A90E2' 
             },
             'Bibi_trial': {
                 title: 'תיקי נתניהו',
-                desc: 'הכנס כאן את טקסט ההסבר על תיקי נתניהו...' 
+                desc: 'תיקי נתניהו עוסקים בהליכים המשפטיים המתנהלים נגד ראש הממשלה. המשפט מעורר פולמוס ציבורי נרחב בשאלות של טוהר המידות, תקשורת ופוליטיקה, לצד שאלות על אמון הציבור במערכות אכיפת החוק.',
+                color: '#F5A623' 
             }
         };
 
@@ -49,9 +53,17 @@ class ChatRoom {
     initUI() {
         const data = this.topicData[this.topic];
         if (data) {
-            document.getElementById('sidebarTitle').textContent = data.title;
-            document.getElementById('sidebarText').innerHTML = data.desc;
+            // Update Header & Modal text
             document.getElementById('headerTitle').textContent = data.title;
+            document.getElementById('modalTitle').textContent = data.title;
+            document.getElementById('modalDesc').textContent = data.desc;
+            
+            // Dynamically change header color & modal border!
+            const header = document.getElementById('mainChatHeader');
+            const modalBox = document.getElementById('modalContentBox');
+            
+            if (header) header.style.backgroundColor = data.color;
+            if (modalBox) modalBox.style.borderTopColor = data.color;
         }
     }
 
@@ -86,6 +98,30 @@ class ChatRoom {
                 this.fetchAndDisplayMessages(); // Instantly refresh
             });
         }
+        
+        // --- Modal Pop-up Logic ---
+        const titleContainer = document.getElementById("titleContainer");
+        const topicModal = document.getElementById("topicModal");
+        const closeModalBtn = document.getElementById("closeModalBtn");
+
+        if (titleContainer && topicModal && closeModalBtn) {
+            // Open modal
+            titleContainer.addEventListener("click", () => {
+                topicModal.classList.remove("hidden");
+            });
+
+            // Close modal via button
+            closeModalBtn.addEventListener("click", () => {
+                topicModal.classList.add("hidden");
+            });
+
+            // Close modal by clicking the dark background outside the box
+            topicModal.addEventListener("click", (e) => {
+                if (e.target === topicModal) {
+                    topicModal.classList.add("hidden");
+                }
+            });
+        }
 
         const chatBox = document.getElementById("chatMessages");
         if (chatBox) {
@@ -94,6 +130,20 @@ class ChatRoom {
                 this.userScrolledUp = !nearBottom;
             });
         }
+        // --- Cancel AI Options by Clicking Outside ---
+        document.addEventListener("click", (event) => {
+            const optionsDiv = document.getElementById("messageOptions");
+            const sendButton = document.getElementById("sendButton");
+            
+            // If the options menu is currently open on the screen...
+            if (optionsDiv && optionsDiv.style.display === 'flex') {
+                // And the user clicked OUTSIDE the options box and NOT on the send button...
+                if (!optionsDiv.contains(event.target) && event.target !== sendButton) {
+                    // Hide the options!
+                    optionsDiv.style.display = 'none'; 
+                }
+            }
+        });
     }
 
     async handleSendMessage() {
@@ -176,6 +226,9 @@ class ChatRoom {
     }
 
     async fetchAndDisplayMessages() {
+        this.currentFetchId = (this.currentFetchId || 0) + 1;
+        const myFetchId = this.currentFetchId;
+
         try {
             // Decide which URL to use based on the current mode
             let messagesUrl = `http://localhost:3000/messages?topic=${encodeURIComponent(this.topic)}`;
@@ -192,6 +245,12 @@ class ChatRoom {
             const messages = await messagesRes.json();
             const reactions = await reactionsRes.json();
 
+            // 🚀 THE FIX: If the user clicked a button while we were waiting for the database,
+            // our ticket number is now old. Throw this data away to prevent mixing!
+            if (this.currentFetchId !== myFetchId) {
+                return; 
+            }
+
             const reactionMap = {};
             reactions.forEach(r => {
                 reactionMap[r.message_id] = {
@@ -207,14 +266,13 @@ class ChatRoom {
                 const msgDate = new Date(msg.created_at);
                 const dateOnly = msgDate.toLocaleDateString('he-IL');
 
-                // 🚀 THE FIX: Only draw the date if we haven't seen it yet!
                 if (!this.displayedDates.has(dateOnly)) {
                     const wrapper = document.createElement("div");
                     wrapper.style.textAlign = "center";
                     wrapper.innerHTML = `<div class="date-divider">${dateOnly}</div>`;
                     chatBox.appendChild(wrapper);
                     
-                    this.displayedDates.add(dateOnly); // Add to memory
+                    this.displayedDates.add(dateOnly); 
                 }
 
                 const fullMessage = `${msg.username}: ${msg.content}`;

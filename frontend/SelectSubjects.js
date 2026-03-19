@@ -2,29 +2,30 @@ const topics = [
   {
     title: "הרפורמה המשפטית",
     description: "האם ואיך יש לאזן בין הרשויות בישראל?",
-    color: "#315769",
+    color: '#b13342' ,
     icon: "scale",
     id: "Legal_reform"
   },
   {
-    title: "המלחמה בעזה ונושא החטופים",
+    
+    title:"בחירות לכנסת 2026",
     description: "מה הדרך הנכונה להתמודד עם המצב?",
     icon: "target",
-    color: "#DDA853",
+    color: '#4A90E2' ,
     id: "Gaza_war"
   },
   {
     title: "חוק הגיוס",
     description: "שוויון בנטל או זכויות קהילתיות?",
     icon: "shield",
-    color: "#328E6E",
+    color: '#5b8a72' ,
     id: "Recruitment_law"
   },
   {
     title: "משפט נתניהו",
     description: "האם יש כאן רדיפה פוליטית או צדק?",
     icon: "gavel",
-    color: "#522546",
+    color: '#F5A623' ,
     id: "Bibi_trial"
   }
 ];
