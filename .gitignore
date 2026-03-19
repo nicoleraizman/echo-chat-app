@@ -1,2 +1,4 @@
 # לא לעקוב אחרי קובץ הסודות
 .env
+node_modules/
+.DS_Store
