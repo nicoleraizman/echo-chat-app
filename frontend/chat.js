@@ -160,7 +160,7 @@ class ChatRoom {
 
         try {
             // SECURE CALL: Asking our own backend to evaluate the message via Groq
-            const response = await fetch("http://localhost:3000/moderate-message", {
+            const response = await fetch("hhttps://echo-solo-backend.onrender.com/moderate-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ message: inputMessage })
@@ -214,7 +214,7 @@ class ChatRoom {
 
     async sendToBackend(message) {
         try {
-            await fetch("http://localhost:3000/send-message", {
+            await fetch("https://echo-solo-backend.onrender.com/send-message", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: this.username, content: message, topic: this.topic })
@@ -231,15 +231,15 @@ class ChatRoom {
 
         try {
             // Decide which URL to use based on the current mode
-            let messagesUrl = `http://localhost:3000/messages?topic=${encodeURIComponent(this.topic)}`;
+            let messagesUrl = `https://echo-solo-backend.onrender.com/messages?topic=${encodeURIComponent(this.topic)}`;
             
             if (this.viewMode === 'mine') {
-                messagesUrl = `http://localhost:3000/api/messages/user/${encodeURIComponent(this.username)}`;
+                messagesUrl = `https://echo-solo-backend.onrender.com/api/messages/user/${encodeURIComponent(this.username)}`;
             }
 
             const [messagesRes, reactionsRes] = await Promise.all([
                 fetch(messagesUrl), 
-                fetch(`http://localhost:3000/reactions?topic=${encodeURIComponent(this.topic)}`)
+                fetch(`https://echo-solo-backend.onrender.com/reactions?topic=${encodeURIComponent(this.topic)}`)
             ]);
 
             const messages = await messagesRes.json();
@@ -359,7 +359,7 @@ class ChatRoom {
     async sendReaction(messageId, reactionType, currentReaction) {
         const reactionToSend = (reactionType === currentReaction) ? null : reactionType;
         try {
-            await fetch("http://localhost:3000/react", {
+            await fetch("https://echo-solo-backend.onrender.com/react", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ username: this.username, message_id: messageId, reaction: reactionToSend })
