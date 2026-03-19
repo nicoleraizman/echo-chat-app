@@ -3,18 +3,14 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>בחרו נושא לדיון</title>
+  <title>ECHO Login</title>
 
-  <!-- TailwindCSS -->
+  <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
-
   <!-- Google Font -->
-  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Heebo:wght@400;700&display=swap" rel="stylesheet" />
 
-  <!-- Tailwind config -->
   <script>
     tailwind.config = {
       theme: {
@@ -22,26 +18,45 @@
           fontFamily: {
             sans: ['Heebo', 'sans-serif'],
           },
+          colors: {
+            primary: '#315769',
+            primaryHover: '#274a59',
+          },
         },
       },
     };
   </script>
+
+  <!-- Google Identity Services -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
 </head>
 
-<body class="bg-gray-50 text-gray-900 font-sans flex flex-col justify-center items-center min-h-screen">
+<body class="bg-gray-50 font-sans flex items-center justify-center min-h-screen">
+  <div class="container mx-auto max-w-md bg-white p-8 rounded-2xl shadow-lg text-center">
+    <img src="icon2.png" alt="ECHO Logo" class="mx-auto mb-8 w-36 h-auto" />
+    <h1 class="text-3xl font-bold mb-4 text-gray-900">ברוכים הבאים!</h1>
+    <h2 class="text-xl font-semibold mb-6 text-gray-700">
+      הצטרפו אלינו ודברו עם אנשים אחרים על מה שבוער עכשיו.
+    </h2>
+    <p class="text-gray-600 mb-8 text-base">
+      שימו לב - אנחנו מאמינים בשיח חופשי ומכבד, ועל כן הודעות פוגעניות ינוסחו מחדש ע"י מודל חכם ויפורסמו לאחר אישור מחדש.
+    </p>
 
-  <div class="container mx-auto px-4 py-10 max-w-full sm:max-w-6xl">
-    <div class="text-center mb-10">
-      <h1 class="text-3xl sm:text-4xl font-bold mb-2">שלום, <span id="nickname"></span></h1>
-      <h2 class="text-2xl text-gray-700 mb-2">בחרי פורום להשתתף בו</h2>
-      <p class="text-sm text-gray-500">כל ההודעות עוברות סינון על ידי בינה מלאכותית</p>
-    </div>
+    <input
+      type="text"
+      id="nickname"
+      placeholder="נא לבחור כינוי"
+      class="w-full p-3 rounded-lg border border-gray-300 mb-6 text-lg"
+    />
 
-    <div class="grid gap-8 md:grid-cols-2 lg:grid-cols-4 sm:grid-cols-1" id="topics-container"></div>
+    <p class="text-gray-700 text-lg font-semibold mb-3">
+      התחבר עם חשבון גוגל 
+    </p>
+
+    <div id="googleSignInDiv" class="flex justify-center"></div>
   </div>
 
-  <script src="SelectSubjects.js"></script>
-
+  <script src="WelcomePage.js"></script>
 </body>
 </html>
 
